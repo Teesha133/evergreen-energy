@@ -88,7 +88,7 @@ export default function ProductManagementPage() {
           {
             id: 2,
             name: "Tile Roof System",
-            material: "tile",
+            material: "tile", 
             pricePerSquare: "850.00",
             showPricing: true,
             isDefault: false,
