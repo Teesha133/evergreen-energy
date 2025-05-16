@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SignOutButton, useUser } from '@clerk/nextjs'
 import { Badge } from "@/components/ui/badge"
+import { useIsAdmin } from "./admin-check"
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -25,24 +26,22 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user } = useUser();
+  const { isAdmin } = useIsAdmin();
   const [logoSrc, setLogoSrc] = useState("/evergreen.png");
   
-  // Simulating user roles - in a real app, this would come from a database
-  const userRole = "admin"; // Temp hard-coded for demo
-
   const navItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
     { icon: FileText, label: "Proposals", href: "/proposals" },
     { icon: Users, label: "Customers", href: "/customers" },
     { icon: BarChart3, label: "Reports", href: "/reports" },
     { icon: Settings, label: "Settings", href: "/settings" },
-  ]
-  
-  // Add admin link for users with admin role
-  if (userRole === "admin") {
-    navItems.push({ icon: Shield, label: "Admin", href: "/admin" });
-  }
+  ];
 
+  // Add admin item to navigation items if user is admin
+  const displayNavItems = isAdmin 
+    ? [...navItems, { icon: Shield, label: "Admin", href: "/admin" }] 
+    : navItems;
+  
   // Handle logo loading error
   const handleLogoError = () => {
     // Fallback to logo.jpeg if evergreen.png fails to load
@@ -80,8 +79,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
+                  
                   <nav className="space-y-1">
-                    {navItems.map((item, index) => (
+                    {displayNavItems.map((item, index) => (
                       <Link
                         key={index}
                         href={item.href}
@@ -89,9 +89,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       >
                         <item.icon className="h-4 w-4 text-gray-600" />
                         <span className="text-sm font-medium">{item.label}</span>
-                        {item.label === "Admin" && (
-                          <Badge className="ml-auto bg-rose-600 text-xs">Admin</Badge>
-                        )}
                       </Link>
                     ))}
                   </nav>
@@ -138,13 +135,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">{user?.fullName || "User"}</span>
                     <span className="text-xs text-gray-500">{user?.primaryEmailAddress?.emailAddress || ""}</span>
-                    {userRole === "admin" && (
+                    {isAdmin && (
                       <Badge className="mt-1 bg-rose-600 text-xs">Administrator</Badge>
                     )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {userRole === "admin" && (
+                {isAdmin && (
                   <Link href="/admin">
                     <DropdownMenuItem>
                       <Shield className="mr-2 h-4 w-4" />
@@ -175,7 +172,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Sidebar (desktop only) */}
         <aside className="hidden md:block w-64 border-r bg-white">
           <div className="p-6 space-y-1">
-            {navItems.map((item, index) => (
+            {displayNavItems.map((item, index) => (
               <Link
                 key={index}
                 href={item.href}
@@ -183,9 +180,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               >
                 <item.icon className="h-4 w-4 text-gray-600" />
                 <span className="text-sm font-medium">{item.label}</span>
-                {item.label === "Admin" && (
-                  <Badge className="ml-auto bg-rose-600 text-xs">Admin</Badge>
-                )}
               </Link>
             ))}
           </div>

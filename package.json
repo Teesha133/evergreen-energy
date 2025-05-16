@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "admin:setup": "node scripts/set-first-admin.js"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "latest",
+    "@clerk/clerk-sdk-node": "^4.13.9",
     "@clerk/nextjs": "^6.19.1",
     "@cloudflare/workers-types": "latest",
     "@electric-sql/pglite": "latest",
@@ -64,6 +66,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "latest",
     "embla-carousel-react": "8.5.1",
     "expo-sqlite": "latest",
@@ -76,6 +79,7 @@
     "mysql2": "latest",
     "next": "15.2.4",
     "next-themes": "^0.4.4",
+    "node-fetch": "^2.7.0",
     "nodemailer": "latest",
     "pg": "latest",
     "postgres": "latest",
