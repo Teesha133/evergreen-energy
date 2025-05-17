@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { Toaster } from "@/components/ui/toaster"
 import ScrollToTop from "@/components/scroll-to-top"
 import { ClerkClientProvider } from "@/components/clerk-provider"
+import UserSyncProvider from "@/components/user-sync-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,9 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <ClerkClientProvider>
-          {children}
-          <ScrollToTop />
-          <Toaster />
+          <UserSyncProvider>
+            {children}
+            <ScrollToTop />
+            <Toaster />
+          </UserSyncProvider>
         </ClerkClientProvider>
       </body>
     </html>
