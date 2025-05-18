@@ -8,6 +8,11 @@ import { formatDate, formatPercentage, themeGradients } from "@/lib/chart-utils"
 const CustomDot = (props: any) => {
   const { cx, cy, payload, dataKey } = props;
   
+  // Skip rendering if coordinates are invalid
+  if (isNaN(cx) || isNaN(cy) || cx === null || cy === null) {
+    return null;
+  }
+  
   // Different styling based on data type
   const fill = dataKey === "proposals" ? themeGradients.secondary[0] : themeGradients.warning[0];
   const stroke = dataKey === "proposals" ? themeGradients.secondary[1] : themeGradients.warning[1];
@@ -44,13 +49,25 @@ export function DashboardPerformanceChart() {
         
         // Format data from conversion rate for the chart
         if (reportData.conversionRate && reportData.conversionRate.length > 0) {
-          const chartData = reportData.conversionRate.map((item: any) => ({
-            date: formatDate(item.week, "short"),
-            proposals: item.total || 0,
-            conversion: item.rate || 0,
-          }));
+          const chartData = reportData.conversionRate
+            .map((item: any) => ({
+              date: formatDate(item.week, "short"),
+              proposals: item.total || 0,
+              conversion: item.rate || 0,
+            }))
+            // Filter out any invalid data points
+            .filter((item: any) => 
+              !isNaN(item.proposals) && 
+              !isNaN(item.conversion) && 
+              item.date
+            );
           
-          setData(chartData);
+          if (chartData.length > 0) {
+            setData(chartData);
+          } else {
+            // If no valid data after filtering, use demo data
+            setData(getDemoData());
+          }
         } else {
           // Fallback to demo data if no data available
           setData(getDemoData());

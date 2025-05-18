@@ -18,6 +18,17 @@ export const ADMIN_USER_IDS: string[] = [
   // Add admin user IDs here, e.g. 'user_2xB9Hk2...'
 ];
 
+// Helper function to get the current user ID
+async function getCurrentUserId() {
+  try {
+    const { userId } = await auth();
+    return userId;
+  } catch (error) {
+    console.error("Error getting current user ID:", error);
+    return null;
+  }
+}
+
 /**
  * Get the role for a user from our database or fallback list
  */
@@ -47,7 +58,7 @@ export async function getUserRole(userId: string): Promise<Role> {
  */
 export async function getCurrentUser(): Promise<UserData | null> {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     
     if (!userId) {
       console.log("AUTH-UTILS: No user ID in auth context");
@@ -75,7 +86,7 @@ export async function getCurrentUser(): Promise<UserData | null> {
  * Check if the current user is authenticated
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
   return !!userId;
 }
 
@@ -84,7 +95,7 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function isAdmin(): Promise<boolean> {
   try {
-    const { userId } = await auth();
+    const userId = await getCurrentUserId();
     if (!userId) return false;
     
     // First try to get role from our database
@@ -161,10 +172,20 @@ export async function canAccessData(dataOwnerId: string): Promise<boolean> {
  * Apply user filters to a SQL query
  * For admin users, returns all data
  * For regular users, only returns their own data
+ * 
+ * @param query The SQL query to filter
+ * @param params The existing parameters for the query
+ * @param userIdColumn The column name that contains the user ID (default: 'user_id')
+ * @param tableName Optional table name prefix for the user ID column (e.g., 'p.' for 'p.user_id')
  */
-export async function applyUserFilter(query: string, params: any[] = []): Promise<{ query: string, params: any[] }> {
+export async function applyUserFilter(
+  query: string, 
+  params: any[] = [], 
+  userIdColumn: string = 'user_id',
+  tableName: string = ''
+): Promise<{ query: string, params: any[] }> {
   const isUserAdmin = await isAdmin();
-  const { userId } = await auth();
+  const userId = await getCurrentUserId();
   
   if (!userId) {
     throw new Error("User not authenticated");
@@ -175,21 +196,67 @@ export async function applyUserFilter(query: string, params: any[] = []): Promis
     return { query, params };
   } else {
     // Regular users can only see their own data
-    // This assumes your tables have a user_id or owner_id column
+    const columnName = tableName ? `${tableName}.${userIdColumn}` : userIdColumn;
+    
+    // Check if the query has GROUP BY, ORDER BY, or LIMIT clauses
+    const hasGroupBy = query.toLowerCase().includes('group by');
+    const hasOrderBy = query.toLowerCase().includes('order by');
+    const hasLimit = query.toLowerCase().includes('limit');
+    
+    let modifiedQuery = query;
+    
     if (query.toLowerCase().includes('where')) {
       // If the query already has a WHERE clause, add user filter with AND
-      const modifiedQuery = query + ` AND user_id = $${params.length + 1}`;
-      return { 
-        query: modifiedQuery, 
-        params: [...params, userId] 
-      };
+      // Find the position of GROUP BY, ORDER BY, or LIMIT if they exist
+      let insertPosition = modifiedQuery.length;
+      
+      if (hasGroupBy) {
+        const groupByPos = modifiedQuery.toLowerCase().indexOf('group by');
+        insertPosition = Math.min(insertPosition, groupByPos);
+      }
+      
+      if (hasOrderBy) {
+        const orderByPos = modifiedQuery.toLowerCase().indexOf('order by');
+        insertPosition = Math.min(insertPosition, orderByPos);
+      }
+      
+      if (hasLimit) {
+        const limitPos = modifiedQuery.toLowerCase().indexOf('limit');
+        insertPosition = Math.min(insertPosition, limitPos);
+      }
+      
+      // Insert the filter condition at the right position
+      modifiedQuery = modifiedQuery.slice(0, insertPosition) + 
+                    ` AND ${columnName} = $${params.length + 1}` + 
+                    modifiedQuery.slice(insertPosition);
     } else {
-      // If no WHERE clause, add one for user_id
-      const modifiedQuery = query + ` WHERE user_id = $${params.length + 1}`;
-      return { 
-        query: modifiedQuery, 
-        params: [...params, userId] 
-      };
+      // If no WHERE clause, add one for user_id, but before GROUP BY/ORDER BY/LIMIT
+      let insertPosition = modifiedQuery.length;
+      
+      if (hasGroupBy) {
+        const groupByPos = modifiedQuery.toLowerCase().indexOf('group by');
+        insertPosition = Math.min(insertPosition, groupByPos);
+      }
+      
+      if (hasOrderBy) {
+        const orderByPos = modifiedQuery.toLowerCase().indexOf('order by');
+        insertPosition = Math.min(insertPosition, orderByPos);
+      }
+      
+      if (hasLimit) {
+        const limitPos = modifiedQuery.toLowerCase().indexOf('limit');
+        insertPosition = Math.min(insertPosition, limitPos);
+      }
+      
+      // Insert the WHERE clause at the right position
+      modifiedQuery = modifiedQuery.slice(0, insertPosition) + 
+                    ` WHERE ${columnName} = $${params.length + 1} ` + 
+                    modifiedQuery.slice(insertPosition);
     }
+    
+    return { 
+      query: modifiedQuery, 
+      params: [...params, userId] 
+    };
   }
 } 

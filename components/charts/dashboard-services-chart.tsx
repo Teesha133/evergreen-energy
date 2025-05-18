@@ -40,12 +40,21 @@ export function DashboardServicesChart() {
         
         // Format data from popular services for the chart
         if (reportData.popularServices && reportData.popularServices.length > 0) {
-          const chartData = reportData.popularServices.map((item: any) => ({
-            name: item.product_type || "Unknown",
-            count: item.count || 0,
-          })).slice(0, 5); // Limit to top 5
+          const chartData = reportData.popularServices
+            .map((item: any) => ({
+              name: item.product_type || "Unknown",
+              count: item.count || 0,
+            }))
+            // Filter out invalid data
+            .filter((item: any) => !isNaN(item.count) && item.name)
+            .slice(0, 5); // Limit to top 5
           
-          setData(chartData);
+          if (chartData.length > 0) {
+            setData(chartData);
+          } else {
+            // If no valid data after filtering, use demo data
+            setData(getDemoData());
+          }
         } else {
           // Fallback to demo data if no data available
           setData(getDemoData());

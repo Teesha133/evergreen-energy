@@ -110,12 +110,17 @@ export default function DashboardPage() {
       
       setLoading(true)
       try {
-        let url = '/api/proposals'
+        // For 'active', we need to handle this a bit differently - it includes multiple statuses
+        let url = `/api/proposals/status?status=${activeFilter}`
         
         if (activeFilter === 'active') {
-          url = '/api/proposals/active'
-        } else {
-          url = `/api/proposals/status?status=${activeFilter}`
+          // Filter client-side for active status (not rejected, not completed)
+          const activeProposals = recentProposals.filter(proposal => 
+            !['rejected', 'completed', 'cancelled'].includes(proposal.status)
+          )
+          setFilteredProposals(activeProposals)
+          setLoading(false)
+          return
         }
         
         const response = await fetch(url)
@@ -125,22 +130,16 @@ export default function DashboardPage() {
           setFilteredProposals(data.proposals)
         } else {
           // If there's an error, fallback to client-side filtering
-          setFilteredProposals(recentProposals.filter(proposal => {
-            if (activeFilter === 'active') {
-              return !['completed', 'cancelled', 'rejected'].includes(proposal.status)
-            }
-            return proposal.status === activeFilter
-          }))
+          setFilteredProposals(recentProposals.filter(proposal => 
+            proposal.status === activeFilter
+          ))
         }
       } catch (error) {
         console.error(`Error fetching ${activeFilter} proposals:`, error)
         // Fallback to client-side filtering on error
-        setFilteredProposals(recentProposals.filter(proposal => {
-          if (activeFilter === 'active') {
-            return !['completed', 'cancelled', 'rejected'].includes(proposal.status)
-          }
-          return proposal.status === activeFilter
-        }))
+        setFilteredProposals(recentProposals.filter(proposal => 
+          proposal.status === activeFilter
+        ))
       } finally {
         setLoading(false)
       }
@@ -300,12 +299,11 @@ export default function DashboardPage() {
                   <CardDescription>View and manage your recent proposals</CardDescription>
                 </div>
                 <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full sm:w-auto">
-                  <TabsList className="grid grid-cols-5 w-full sm:w-auto">
+                  <TabsList className="grid grid-cols-4 w-full sm:w-auto">
                     <TabsTrigger value="all">All</TabsTrigger>
                     <TabsTrigger value="active">Active</TabsTrigger>
                     <TabsTrigger value="signed">Signed</TabsTrigger>
                     <TabsTrigger value="sent">Sent</TabsTrigger>
-                    <TabsTrigger value="rejected">Rejected</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>

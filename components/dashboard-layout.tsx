@@ -119,7 +119,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
                     <AvatarImage src={user?.imageUrl || "/placeholder-user.jpg"} alt={user?.fullName || "User"} />
                     <AvatarFallback className="bg-rose-100 text-rose-800">
-                      {user?.firstName?.[0]}{user?.lastName?.[0] || 'U'}
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName[0]}${user.lastName[0]}`
+                        : 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -129,7 +131,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.imageUrl || "/placeholder-user.jpg"} alt={user?.fullName || "User"} />
                     <AvatarFallback className="bg-rose-100 text-rose-800">
-                      {user?.firstName?.[0]}{user?.lastName?.[0] || 'U'}
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName[0]}${user.lastName[0]}`
+                        : 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">

@@ -1,10 +1,28 @@
 import { executeQuery } from "@/lib/db"
 import { NextResponse } from "next/server"
+import { applyUserFilter } from "@/lib/auth-utils"
+import { auth } from "@clerk/nextjs/server"
+
+// Helper function to get the current user ID
+async function getCurrentUserId() {
+  try {
+    const { userId } = await auth();
+    return userId;
+  } catch (error) {
+    console.error("Error getting current user ID:", error);
+    return null;
+  }
+}
 
 export async function GET() {
   try {
-    const proposals = await executeQuery(
-      `
+    const userId = await getCurrentUserId();
+    
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
+    }
+    
+    const baseQuery = `
       SELECT 
         p.id, 
         p.proposal_number, 
@@ -25,8 +43,11 @@ export async function GET() {
         p.id, c.name
       ORDER BY 
         p.created_at DESC
-    `,
-    )
+    `
+    
+    // Apply user filtering based on role
+    const { query, params } = await applyUserFilter(baseQuery, [], 'user_id', 'p');
+    const proposals = await executeQuery(query, params);
 
     return NextResponse.json({ success: true, proposals })
   } catch (error) {

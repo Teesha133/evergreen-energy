@@ -2,10 +2,20 @@
 
 import { executeQuery } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { auth } from "@clerk/nextjs/server"
 
 // Get dashboard metrics
 export async function getDashboardMetrics() {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return {
+        totalProposals: 0,
+        activeCustomers: 0,
+        conversionRate: 0,
+      };
+    }
+    
     // Count total proposals
     const totalProposalsResult = await executeQuery(`
       SELECT COUNT(*) as count FROM proposals
@@ -184,17 +194,35 @@ export async function getProposalById(id: string) {
   }
 }
 
+// Function to get the current user's ID from Clerk
+async function getCurrentUserId() {
+  try {
+    const { userId } = await auth();
+    return userId;
+  } catch (error) {
+    console.error("Error getting current user ID:", error);
+    return null;
+  }
+}
+
 // Create a new proposal
 export async function createProposal(data: any) {
   try {
+    // Get current user's ID from Clerk
+    const userId = await getCurrentUserId();
+    
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
     // Start a transaction
     await executeQuery("BEGIN")
 
     // 1. Create or update customer
     const customerResult = await executeQuery(
       `
-      INSERT INTO customers (name, email, phone, address)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO customers (name, email, phone, address, user_id)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (email) DO UPDATE SET
         name = EXCLUDED.name,
         phone = EXCLUDED.phone,
@@ -202,7 +230,7 @@ export async function createProposal(data: any) {
         updated_at = CURRENT_TIMESTAMP
       RETURNING id
     `,
-      [data.customer.name, data.customer.email, data.customer.phone, data.customer.address],
+      [data.customer.name, data.customer.email, data.customer.phone, data.customer.address, userId],
     )
 
     const customerId = customerResult[0].id
@@ -215,9 +243,9 @@ export async function createProposal(data: any) {
       `
       INSERT INTO proposals (
         proposal_number, customer_id, status, subtotal, discount, total, 
-        monthly_payment, financing_term, interest_rate, created_by
+        monthly_payment, financing_term, interest_rate, created_by, user_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING id
     `,
       [
@@ -230,7 +258,8 @@ export async function createProposal(data: any) {
         data.pricing.monthlyPayment,
         data.pricing.financingTerm || 60,
         data.pricing.interestRate || 5.99,
-        data.createdBy || "system",
+        data.createdBy || userId,
+        userId
       ],
     )
 
@@ -283,7 +312,7 @@ export async function createProposal(data: any) {
       INSERT INTO activity_log (proposal_id, user_id, action, details)
       VALUES ($1, $2, $3, $4)
     `,
-      [proposalId, data.createdBy || "system", "create_proposal", JSON.stringify({ proposalNumber })],
+      [proposalId, userId, "create_proposal", JSON.stringify({ proposalNumber })],
     )
 
     // Commit the transaction
