@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "admin:setup": "node scripts/set-first-admin.js"
+    "admin:setup": "node scripts/set-first-admin.js",
+    "admin:direct": "node scripts/set-admin-direct.js",
+    "update:roles": "node scripts/update-existing-roles.js"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "latest",

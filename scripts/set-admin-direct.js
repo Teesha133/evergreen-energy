@@ -17,7 +17,7 @@ async function setAdminRole() {
     console.log(`Setting user ${userId} as admin...`);
     
     // Call Clerk API directly using fetch
-    const clerkUrl = `https://api.clerk.dev/v1/users/${userId}/metadata`;
+    const clerkUrl = `https://api.clerk.com/v1/users/${userId}/metadata`;
     const response = await fetch(clerkUrl, {
       method: 'PATCH',
       headers: {

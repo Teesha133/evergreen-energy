@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { neon } from "@neondatabase/serverless";
+import { auth } from "@clerk/nextjs/server";
+import { getUserRole } from "@/lib/auth-utils";
 
 // Hardcoded database URL as fallback in case environment variable is missing
 const FALLBACK_DB_URL = "postgres://default:Q1IaokPXMxrg@ep-icy-haze-05477472.us-east-1.postgres.vercel-storage.com:5432/verceldb?sslmode=require";
@@ -46,28 +48,79 @@ async function testDatabaseConnection() {
   }
 }
 
-export async function POST(request: NextRequest) {
-  console.log("DIRECT API: Request received");
-  
-  // First test the database connection
-  const dbTest = await testDatabaseConnection();
-  console.log("DIRECT API: Database connection test:", dbTest);
-  
-  if (!dbTest.success) {
+// Special endpoint for middleware to check role
+async function handleRoleCheck() {
+  try {
+    // Get user from auth
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+    
+    // Try to get the user from the database
+    try {
+      const users = await executeQuery(
+        `SELECT id, clerk_id, email, name, role FROM users WHERE clerk_id = $1`,
+        [userId]
+      );
+      
+      if (users.length > 0) {
+        // User exists in the database
+        return NextResponse.json({
+          success: true,
+          user: users[0]
+        });
+      } else {
+        // User doesn't exist in the database yet
+        // Determine role and return it
+        const role = await getUserRole(userId);
+        return NextResponse.json({
+          success: true,
+          user: {
+            clerk_id: userId,
+            role: role
+          }
+        });
+      }
+    } catch (dbError) {
+      console.error("ROLE CHECK: Database error:", dbError);
+      // Fall back to the role check
+      const role = await getUserRole(userId);
+      return NextResponse.json({
+        success: true,
+        user: {
+          clerk_id: userId,
+          role: role
+        }
+      });
+    }
+  } catch (error) {
+    console.error("ROLE CHECK: Error getting user role:", error);
     return NextResponse.json(
-      { success: false, error: `Database connection failed: ${dbTest.message}` },
+      { success: false, error: "Failed to get user role" },
       { status: 500 }
     );
   }
-  
-  // Choose which database method to use based on connection test
-  const useDirectConnection = dbTest.method === 'direct';
-  const sql = useDirectConnection ? getDirectDbConnection() : null;
+}
+
+export async function POST(request: NextRequest) {
+  console.log("DIRECT API: Request received");
   
   try {
-    // Get the user ID from the request body
-    console.log("DIRECT API: Parsing request body");
+    // Get the request body
     const body = await request.json();
+    
+    // Check if this is a role-only check
+    if (body.checkRoleOnly === true) {
+      console.log("DIRECT API: Role only check requested");
+      return handleRoleCheck();
+    }
+    
+    // Normal sync operation continues below
     const { userId, email = 'pending@example.com', name = '' } = body;
     
     console.log("DIRECT API: Request body parsed:", { userId, email, name });
@@ -80,7 +133,26 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // First test the database connection
+    const dbTest = await testDatabaseConnection();
+    console.log("DIRECT API: Database connection test:", dbTest);
+    
+    if (!dbTest.success) {
+      return NextResponse.json(
+        { success: false, error: `Database connection failed: ${dbTest.message}` },
+        { status: 500 }
+      );
+    }
+    
+    // Determine user role
+    const role = await getUserRole(userId);
+    console.log(`DIRECT API: User ${userId} assigned role: ${role}`);
+    
     console.log("DIRECT API: Starting user sync for", userId);
+    
+    // Choose which database method to use based on connection test
+    const useDirectConnection = dbTest.method === 'direct';
+    const sql = useDirectConnection ? getDirectDbConnection() : null;
     
     try {
       // Check if users table exists and create it if needed
@@ -110,7 +182,7 @@ export async function POST(request: NextRequest) {
                 clerk_id VARCHAR(255) NOT NULL UNIQUE,
                 email VARCHAR(255) NOT NULL,
                 name VARCHAR(255),
-                role VARCHAR(50),
+                role VARCHAR(50) NOT NULL DEFAULT 'user',
                 metadata JSONB,
                 last_login TIMESTAMP WITH TIME ZONE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -122,37 +194,6 @@ export async function POST(request: NextRequest) {
           
           // Insert or update the user
           console.log("DIRECT API: Inserting/updating user (direct):", userId);
-          
-          // Try to get role from Clerk
-          let role = 'user';
-          try {
-            if (process.env.CLERK_SECRET_KEY) {
-              console.log("DIRECT API: Fetching user data from Clerk to get role");
-              const clerkUrl = `https://api.clerk.com/v1/users/${userId}`;
-              const clerkResponse = await fetch(clerkUrl, {
-                method: 'GET',
-                headers: {
-                  'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-                  'Content-Type': 'application/json'
-                }
-              });
-              
-              if (clerkResponse.ok) {
-                const userData = await clerkResponse.json();
-                if (userData.public_metadata && userData.public_metadata.role) {
-                  role = userData.public_metadata.role;
-                  console.log(`DIRECT API: Found role in Clerk metadata: ${role}`);
-                }
-              } else {
-                console.error("DIRECT API: Failed to fetch user data from Clerk:", await clerkResponse.text());
-              }
-            } else {
-              console.warn("DIRECT API: CLERK_SECRET_KEY not set, cannot fetch role from Clerk");
-            }
-          } catch (clerkError) {
-            console.error("DIRECT API: Error fetching user data from Clerk:", clerkError);
-          }
-          
           await sql`
             INSERT INTO users (clerk_id, email, name, role, last_login)
             VALUES (${userId}, ${email}, ${name}, ${role}, CURRENT_TIMESTAMP)
@@ -164,12 +205,12 @@ export async function POST(request: NextRequest) {
               last_login = CURRENT_TIMESTAMP
           `;
           
-          console.log(`DIRECT API: User successfully saved to database (direct) with role: ${role}`);
+          console.log("DIRECT API: User successfully saved to database (direct):", userId);
           
           // Verify the user was stored
           console.log("DIRECT API: Verifying user in database (direct)");
           const verifyUser = await sql`
-            SELECT id, clerk_id, email, role, last_login FROM users WHERE clerk_id = ${userId}
+            SELECT id, clerk_id, email, name, role, last_login FROM users WHERE clerk_id = ${userId}
           `;
           
           console.log("DIRECT API: Verification result (direct):", verifyUser);
@@ -190,6 +231,8 @@ export async function POST(request: NextRequest) {
               id: verifyUser[0].id,
               clerk_id: verifyUser[0].clerk_id,
               email: verifyUser[0].email,
+              name: verifyUser[0].name,
+              role: verifyUser[0].role,
               last_login: verifyUser[0].last_login
             }
           });
@@ -222,7 +265,7 @@ export async function POST(request: NextRequest) {
               clerk_id VARCHAR(255) NOT NULL UNIQUE,
               email VARCHAR(255) NOT NULL,
               name VARCHAR(255),
-              role VARCHAR(50),
+              role VARCHAR(50) NOT NULL DEFAULT 'user',
               metadata JSONB,
               last_login TIMESTAMP WITH TIME ZONE,
               created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -234,37 +277,6 @@ export async function POST(request: NextRequest) {
         
         // Insert or update the user
         console.log("DIRECT API: Inserting/updating user:", userId);
-        
-        // Try to get role from Clerk
-        let role = 'user';
-        try {
-          if (process.env.CLERK_SECRET_KEY) {
-            console.log("DIRECT API: Fetching user data from Clerk to get role");
-            const clerkUrl = `https://api.clerk.com/v1/users/${userId}`;
-            const clerkResponse = await fetch(clerkUrl, {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (clerkResponse.ok) {
-              const userData = await clerkResponse.json();
-              if (userData.public_metadata && userData.public_metadata.role) {
-                role = userData.public_metadata.role;
-                console.log(`DIRECT API: Found role in Clerk metadata: ${role}`);
-              }
-            } else {
-              console.error("DIRECT API: Failed to fetch user data from Clerk:", await clerkResponse.text());
-            }
-          } else {
-            console.warn("DIRECT API: CLERK_SECRET_KEY not set, cannot fetch role from Clerk");
-          }
-        } catch (clerkError) {
-          console.error("DIRECT API: Error fetching user data from Clerk:", clerkError);
-        }
-        
         await executeQuery(`
           INSERT INTO users (clerk_id, email, name, role, last_login)
           VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
@@ -272,16 +284,16 @@ export async function POST(request: NextRequest) {
           DO UPDATE SET 
             email = EXCLUDED.email,
             name = EXCLUDED.name,
-            role = $4,
+            role = EXCLUDED.role,
             last_login = CURRENT_TIMESTAMP
         `, [userId, email, name, role]);
         
-        console.log(`DIRECT API: User successfully saved to database with role: ${role}`);
+        console.log("DIRECT API: User successfully saved to database:", userId);
         
         // Verify the user was stored
         console.log("DIRECT API: Verifying user in database");
         const verifyUser = await executeQuery(
-          `SELECT id, clerk_id, email, role, last_login FROM users WHERE clerk_id = $1`,
+          `SELECT id, clerk_id, email, name, role, last_login FROM users WHERE clerk_id = $1`,
           [userId]
         );
         
@@ -303,6 +315,8 @@ export async function POST(request: NextRequest) {
             id: verifyUser[0].id,
             clerk_id: verifyUser[0].clerk_id,
             email: verifyUser[0].email,
+            name: verifyUser[0].name,
+            role: verifyUser[0].role,
             last_login: verifyUser[0].last_login
           }
         });

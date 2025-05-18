@@ -26,7 +26,7 @@ async function setAdminRole() {
     
     // Set up the request options
     const options = {
-      hostname: 'api.clerk.dev',
+      hostname: 'api.clerk.com',
       port: 443,
       path: `/v1/users/${userId}/metadata`,
       method: 'PATCH',
