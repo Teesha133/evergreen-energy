@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { type ReactNode, useState } from "react"
-import { BarChart3, FileText, Home, LogOut, Menu, Settings, Users, X, Shield } from "lucide-react"
+import { type ReactNode, useState, useEffect } from "react"
+import { BarChart3, FileText, Home, LogOut, Menu, Settings, Users, X, Shield, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -18,6 +18,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SignOutButton, useUser } from '@clerk/nextjs'
 import { Badge } from "@/components/ui/badge"
 import { useIsAdmin } from "./admin-check"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -25,16 +27,31 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const { user } = useUser();
   const { isAdmin } = useIsAdmin();
   const [logoSrc, setLogoSrc] = useState("/evergreen.png");
+  
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-collapsed');
+    if (savedState) {
+      setSidebarCollapsed(savedState === 'true');
+    }
+  }, []);
+
+  // Save sidebar state to localStorage when it changes
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('sidebar-collapsed', String(newState));
+  };
   
   const navItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
     { icon: FileText, label: "Proposals", href: "/proposals" },
     { icon: Users, label: "Customers", href: "/customers" },
     { icon: BarChart3, label: "Reports", href: "/reports" },
-    { icon: Settings, label: "Settings", href: "/settings" },
   ];
 
   // Add admin item to navigation items if user is admin
@@ -174,20 +191,55 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar (desktop only) */}
-        <aside className="hidden md:block w-64 border-r bg-white">
-          <div className="p-6 space-y-1">
-            {displayNavItems.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
-              >
-                <item.icon className="h-4 w-4 text-gray-600" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
-            ))}
+        <motion.aside 
+          className={cn(
+            "hidden md:block border-r bg-white shadow",
+            sidebarCollapsed ? "w-16" : "w-64"
+          )}
+          animate={{ width: sidebarCollapsed ? 64 : 256 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <div className="py-6 relative h-full">
+            {/* Toggle button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute -right-3 top-4 h-6 w-6 bg-white border shadow-sm rotate-0"
+              onClick={toggleSidebar}
+            >
+              {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            </Button>
+          
+            <div className="space-y-1 px-2">
+              {displayNavItems.map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors",
+                    sidebarCollapsed && "justify-center"
+                  )}
+                  title={item.label}
+                >
+                  <item.icon className="h-5 w-5 text-gray-600" />
+                  <AnimatePresence>
+                    {!sidebarCollapsed && (
+                      <motion.span 
+                        className="text-sm font-medium"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              ))}
+            </div>
           </div>
-        </aside>
+        </motion.aside>
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-50">

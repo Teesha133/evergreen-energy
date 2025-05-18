@@ -32,11 +32,21 @@ const tableRowVariants = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
 }
 
+interface Customer {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  address?: string
+  proposal_count: number
+  created_at: string
+}
+
 export default function CustomersPage() {
   const headerSection = useScrollAnimation({ threshold: 0.1 })
   const tableSection = useScrollAnimation()
 
-  const [customers, setCustomers] = useState([])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -70,7 +80,7 @@ export default function CustomersPage() {
   )
 
   // Format date function
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -151,7 +161,8 @@ export default function CustomersPage() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium">Name</th>
-                      <th className="text-left py-3 px-4 font-medium">Contact</th>
+                      <th className="text-left py-3 px-4 font-medium">Email</th>
+                      <th className="text-left py-3 px-4 font-medium">Phone</th>
                       <th className="text-left py-3 px-4 font-medium">Address</th>
                       <th className="text-left py-3 px-4 font-medium">Proposals</th>
                       <th className="text-left py-3 px-4 font-medium">Created</th>
@@ -174,18 +185,20 @@ export default function CustomersPage() {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-3 w-3 text-gray-500" />
-                              <span className="text-sm">{customer.email}</span>
-                            </div>
-                            {customer.phone && (
-                              <div className="flex items-center gap-1">
-                                <Phone className="h-3 w-3 text-gray-500" />
-                                <span className="text-sm">{customer.phone}</span>
-                              </div>
-                            )}
+                          <div className="flex items-center gap-1">
+                            <Mail className="h-3 w-3 text-gray-500" />
+                            <span className="text-sm">{customer.email}</span>
                           </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          {customer.phone ? (
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-3 w-3 text-gray-500" />
+                              <span className="text-sm">{customer.phone}</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-400">N/A</span>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-sm">{customer.address || "N/A"}</td>
                         <td className="py-3 px-4">{customer.proposal_count || 0}</td>

@@ -29,15 +29,25 @@ const staggerContainer = {
 }
 
 const tableRowVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+}
+
+interface Proposal {
+  id: string
+  proposal_number: string
+  customer_name: string
+  services: string[]
+  created_at: string
+  status: string
+  total: string
 }
 
 export default function ProposalsPage() {
   const headerSection = useScrollAnimation({ threshold: 0.1 })
   const tableSection = useScrollAnimation()
 
-  const [proposals, setProposals] = useState([])
+  const [proposals, setProposals] = useState<Proposal[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -75,7 +85,7 @@ export default function ProposalsPage() {
   })
 
   // Format date function
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string): string => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -86,7 +96,7 @@ export default function ProposalsPage() {
   }
 
   // Format status with appropriate styling
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: string): string => {
     switch (status) {
       case "signed":
         return "bg-green-100 text-green-800"
@@ -152,8 +162,7 @@ export default function ProposalsPage() {
                 <SelectItem value="sent">Sent</SelectItem>
                 <SelectItem value="viewed">Viewed</SelectItem>
                 <SelectItem value="signed">Signed</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
           </div>

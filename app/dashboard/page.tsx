@@ -288,10 +288,11 @@ export default function DashboardPage() {
                   <CardDescription>View and manage your recent proposals</CardDescription>
                 </div>
                 <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full sm:w-auto">
-                  <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+                  <TabsList className="grid grid-cols-4 w-full sm:w-auto">
                     <TabsTrigger value="all">All</TabsTrigger>
                     <TabsTrigger value="signed">Signed</TabsTrigger>
                     <TabsTrigger value="sent">Sent</TabsTrigger>
+                    <TabsTrigger value="rejected">Rejected</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
