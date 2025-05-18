@@ -24,6 +24,11 @@ const RoundedBar = (props: any) => {
 const CustomDot = (props: any) => {
   const { cx, cy, stroke } = props;
   
+  // Return null if cx or cy is not a valid number
+  if (isNaN(cx) || isNaN(cy)) {
+    return null;
+  }
+  
   return (
     <circle 
       cx={cx} 

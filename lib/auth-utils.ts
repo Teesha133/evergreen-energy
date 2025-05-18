@@ -180,7 +180,7 @@ export async function canAccessData(dataOwnerId: string): Promise<boolean> {
  */
 export async function applyUserFilter(
   query: string, 
-  params: any[] = [], 
+  params: string[] | number[] | any[] = [], 
   userIdColumn: string = 'user_id',
   tableName: string = ''
 ): Promise<{ query: string, params: any[] }> {
@@ -227,7 +227,7 @@ export async function applyUserFilter(
       
       // Insert the filter condition at the right position
       modifiedQuery = modifiedQuery.slice(0, insertPosition) + 
-                    ` AND ${columnName} = $${params.length + 1}` + 
+                    ` AND ${columnName} = $${params.length + 1} ` + 
                     modifiedQuery.slice(insertPosition);
     } else {
       // If no WHERE clause, add one for user_id, but before GROUP BY/ORDER BY/LIMIT

@@ -7,6 +7,11 @@ import { formatCurrency, formatDate, themeGradients } from "@/lib/chart-utils"
 const CustomDot = (props: any) => {
   const { cx, cy, stroke } = props;
   
+  // Return null if cx or cy is not a valid number
+  if (isNaN(cx) || isNaN(cy)) {
+    return null;
+  }
+  
   return (
     <circle 
       cx={cx} 
@@ -30,7 +35,7 @@ export function RevenueTrendChart({ data }: RevenueTrendProps) {
   // Format data for the chart
   const chartData = data.map((item) => ({
     month: formatDate(item.month),
-    revenue: item.revenue,
+    revenue: typeof item.revenue === 'number' && !isNaN(item.revenue) ? item.revenue : 0,
   }))
 
   // Calculate average revenue

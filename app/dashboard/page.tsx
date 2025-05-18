@@ -110,18 +110,7 @@ export default function DashboardPage() {
       
       setLoading(true)
       try {
-        // For 'active', we need to handle this a bit differently - it includes multiple statuses
         let url = `/api/proposals/status?status=${activeFilter}`
-        
-        if (activeFilter === 'active') {
-          // Filter client-side for active status (not rejected, not completed)
-          const activeProposals = recentProposals.filter(proposal => 
-            !['rejected', 'completed', 'cancelled'].includes(proposal.status)
-          )
-          setFilteredProposals(activeProposals)
-          setLoading(false)
-          return
-        }
         
         const response = await fetch(url)
         const data = await response.json()
@@ -299,9 +288,8 @@ export default function DashboardPage() {
                   <CardDescription>View and manage your recent proposals</CardDescription>
                 </div>
                 <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full sm:w-auto">
-                  <TabsList className="grid grid-cols-4 w-full sm:w-auto">
+                  <TabsList className="grid grid-cols-3 w-full sm:w-auto">
                     <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="active">Active</TabsTrigger>
                     <TabsTrigger value="signed">Signed</TabsTrigger>
                     <TabsTrigger value="sent">Sent</TabsTrigger>
                   </TabsList>

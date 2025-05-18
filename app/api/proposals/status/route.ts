@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const admin = await isAdmin();
     
     // Build query based on user role
-    let whereClause, params;
+    let whereClause: string, params: any[];
     
     if (admin) {
       whereClause = "WHERE p.status = $1";

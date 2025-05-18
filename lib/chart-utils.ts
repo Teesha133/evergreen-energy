@@ -54,7 +54,16 @@ export const formatCurrency = (value: number): string => {
 
 // Format date
 export const formatDate = (dateString: string, format: "short" | "long" = "short"): string => {
-  const date = new Date(dateString)
+  if (!dateString) {
+    return "Unknown";
+  }
+  
+  const date = new Date(dateString);
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) {
+    return "Unknown";
+  }
 
   if (format === "short") {
     return new Intl.DateTimeFormat("en-US", {

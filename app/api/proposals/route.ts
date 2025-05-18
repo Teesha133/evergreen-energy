@@ -46,7 +46,7 @@ export async function GET() {
     `
     
     // Apply user filtering based on role
-    const { query, params } = await applyUserFilter(baseQuery, [], 'user_id', 'p');
+    const { query, params } = await applyUserFilter(baseQuery, [] as any[], 'user_id', 'p');
     const proposals = await executeQuery(query, params);
 
     return NextResponse.json({ success: true, proposals })

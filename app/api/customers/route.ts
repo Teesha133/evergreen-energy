@@ -26,7 +26,7 @@ export async function GET() {
     const admin = await isAdmin();
     
     let query;
-    let params;
+    let params: any[];
     
     if (admin) {
       // Admin users can see all customers
