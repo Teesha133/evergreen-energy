@@ -101,11 +101,11 @@ export default function CustomersPage() {
       >
         <h1 className="text-2xl font-bold">Customers</h1>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Link href="/proposals/new">
+          {/* <Link href="/proposals/new">
             <Button className="bg-rose-600 hover:bg-rose-700">
               <Plus className="mr-2 h-4 w-4" /> New Customer
             </Button>
-          </Link>
+          </Link> */}
         </motion.div>
       </motion.div>
 
