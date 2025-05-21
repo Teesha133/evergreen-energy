@@ -7,11 +7,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 
 interface PaintData {
   serviceType: string
   squareFootage: string
-  coats: string
+  colorTone: string
   includePaint: boolean
   includePrimer: boolean
   includePrep: boolean
@@ -27,11 +28,11 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
   const [formData, setFormData] = useState<PaintData>({
     serviceType: data.serviceType || "exterior",
     squareFootage: data.squareFootage || "",
-    coats: data.coats || "2",
-    includePaint: data.includePaint || false,
+    colorTone: data.colorTone || "1",
+    includePaint: data.includePaint !== undefined ? data.includePaint : true,
     includePrimer: data.includePrimer || true,
     includePrep: data.includePrep || true,
-    scopeNotes: data.scopeNotes || generateScopeNotes("exterior", "2", true, true, false),
+    scopeNotes: data.scopeNotes || generateScopeNotes("exterior", "1", true, true, true),
   })
 
   const serviceTypes = [
@@ -40,9 +41,15 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
     { value: "both", label: "Both", description: "Complete interior and exterior painting" },
   ]
 
+  const colorTones = [
+    { value: "1", label: "1 Color" },
+    { value: "2", label: "2-Tone" },
+    { value: "3", label: "3-Tone" },
+  ]
+
   function generateScopeNotes(
     serviceType: string,
-    coats: string,
+    colorTone: string,
     includePrep: boolean,
     includePrimer: boolean,
     includePaint: boolean,
@@ -62,12 +69,12 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
       notes += "- Application of primer to prepared surfaces\n"
     }
 
-    notes += `- Application of ${coats} coat${coats !== "1" ? "s" : ""} of paint\n`
+    notes += `- ${colorTone}-tone color application\n`
 
     if (includePaint) {
-      notes += "- Paint provided by contractor\n"
+      notes += "- Paint color will be selected by the homeowner from provided options.\n"
     } else {
-      notes += "- Color to be chosen by homeowner; paint provided by homeowner unless agreed otherwise\n"
+      notes += "- Homeowner will purchase and supply the paint separately.\n"
     }
 
     notes += "- Clean up and removal of all painting materials\n"
@@ -83,14 +90,14 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
       // Auto-generate scope notes when key fields change
       if (
         field === "serviceType" ||
-        field === "coats" ||
+        field === "colorTone" ||
         field === "includePrep" ||
         field === "includePrimer" ||
         field === "includePaint"
       ) {
         newData.scopeNotes = generateScopeNotes(
           field === "serviceType" ? value : prev.serviceType,
-          field === "coats" ? value : prev.coats,
+          field === "colorTone" ? value : prev.colorTone,
           field === "includePrep" ? value : prev.includePrep,
           field === "includePrimer" ? value : prev.includePrimer,
           field === "includePaint" ? value : prev.includePaint,
@@ -156,32 +163,49 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="coats">Number of Coats</Label>
+          <Label>Color Tone Options</Label>
           <RadioGroup
-            id="coats"
-            value={formData.coats}
-            onValueChange={(value) => handleChange("coats", value)}
-            className="flex gap-4"
+            value={formData.colorTone}
+            onValueChange={(value) => handleChange("colorTone", value)}
+            className="flex flex-wrap gap-4"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="1" id="coats-1" />
-              <Label htmlFor="coats-1">1 Coat</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="2" id="coats-2" />
-              <Label htmlFor="coats-2">2 Coats</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="3" id="coats-3" />
-              <Label htmlFor="coats-3">3 Coats</Label>
-            </div>
+            {colorTones.map((tone) => (
+              <div key={tone.value} className="flex items-center space-x-2">
+                <RadioGroupItem value={tone.value} id={`tone-${tone.value}`} />
+                <Label htmlFor={`tone-${tone.value}`}>{tone.label}</Label>
+              </div>
+            ))}
           </RadioGroup>
         </div>
       </div>
 
       <div className="space-y-4">
+        <h3 className="text-lg font-medium">Paint Inclusion</h3>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="include-paint">Include Paint (default)</Label>
+            <Switch
+              id="include-paint"
+              checked={formData.includePaint}
+              onCheckedChange={(checked) => handleChange("includePaint", checked)}
+            />
+          </div>
+          
+          <p className="text-sm text-gray-500">
+            {formData.includePaint 
+              ? "Paint will be selected by the homeowner from provided color options and is included in the price." 
+              : "Homeowner will purchase and supply the paint. This is a labor-only quote."}
+          </p>
+          
+          <p className="text-xs text-gray-500 mt-2">
+            Default is 'Include Paint'. If homeowner is supplying their own paint, select 'Do Not Include Paint'.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
         <h3 className="text-lg font-medium">Options</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start space-x-3">
             <Checkbox
               id="include-prep"
@@ -209,21 +233,6 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
                 Include Primer
               </Label>
               <p className="text-sm text-gray-500">Apply primer before paint</p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="include-paint"
-              checked={formData.includePaint}
-              onCheckedChange={(checked) => handleChange("includePaint", checked)}
-              className={formData.includePaint ? "text-rose-600" : ""}
-            />
-            <div className="space-y-1">
-              <Label htmlFor="include-paint" className="font-medium cursor-pointer">
-                Include Paint
-              </Label>
-              <p className="text-sm text-gray-500">Contractor provides paint</p>
             </div>
           </div>
         </div>

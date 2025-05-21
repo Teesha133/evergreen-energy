@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 
 interface GarageDoorsData {
   model: string
@@ -14,6 +15,10 @@ interface GarageDoorsData {
   height: string
   addons: string[]
   quantity: string
+  totalPrice: string
+  addonPrices: Record<string, string>
+  showPricing: boolean
+  showAddonPriceBreakdown: boolean
   scopeNotes: string
 }
 
@@ -29,6 +34,10 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
     height: data.height || "7",
     addons: data.addons || [],
     quantity: data.quantity || "1",
+    totalPrice: data.totalPrice || "",
+    addonPrices: data.addonPrices || {},
+    showPricing: data.showPricing !== undefined ? data.showPricing : true,
+    showAddonPriceBreakdown: data.showAddonPriceBreakdown !== undefined ? data.showAddonPriceBreakdown : false,
     scopeNotes: data.scopeNotes || generateScopeNotes("t50l", [], "16", "7"),
   })
 
@@ -115,6 +124,13 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
       updateData(formData)
     }
   }, [formData, updateData, data])
+
+  // Calculate total add-on price
+  const calculateTotalAddonPrice = () => {
+    return Object.values(formData.addonPrices).reduce((total, price) => {
+      return total + (parseFloat(price) || 0);
+    }, 0).toFixed(2);
+  }
 
   return (
     <div className="space-y-6">
@@ -209,6 +225,80 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Pricing</h3>
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="show-pricing">Show to customer</Label>
+            <Switch
+              id="show-pricing"
+              checked={formData.showPricing}
+              onCheckedChange={(checked) => handleChange("showPricing", checked)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="total-price">Garage Door Total Price</Label>
+          <div className="relative max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <Input
+              id="total-price"
+              placeholder="0.00"
+              value={formData.totalPrice}
+              onChange={(e) => handleChange("totalPrice", e.target.value)}
+              className="pl-8"
+            />
+          </div>
+        </div>
+
+        {formData.addons.length > 0 && (
+          <div className="space-y-4 border-t pt-4">
+            <h4 className="font-medium">Add-on Pricing</h4>
+            
+            {formData.addons.map((addon) => (
+              <div key={addon} className="space-y-2">
+                <Label htmlFor={`addon-price-${addon}`}>
+                  {addon.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Price
+                </Label>
+                <div className="relative max-w-xs">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <Input
+                    id={`addon-price-${addon}`}
+                    placeholder="0.00"
+                    value={formData.addonPrices[addon] || ""}
+                    onChange={(e) => {
+                      const newAddonPrices = {...formData.addonPrices, [addon]: e.target.value};
+                      handleChange("addonPrices", newAddonPrices);
+                    }}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            ))}
+            
+            {formData.addons.length > 1 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Total Add-ons Price: ${calculateTotalAddonPrice()}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="show-addon-price-breakdown"
+                    checked={formData.showAddonPriceBreakdown}
+                    onCheckedChange={(checked) => handleChange("showAddonPriceBreakdown", checked)}
+                    className="size-4"
+                  />
+                  <Label htmlFor="show-addon-price-breakdown" className="text-xs">
+                    Show individual add-on prices (or combine into total price)
+                  </Label>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">

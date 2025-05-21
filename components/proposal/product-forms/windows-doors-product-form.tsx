@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
 
 interface WindowsDoorsData {
   windowType: string
@@ -16,6 +17,10 @@ interface WindowsDoorsData {
   windowCount: string
   doorCount: string
   customColors: boolean
+  windowPrice: string
+  doorPrices: Record<string, string>
+  showPricing: boolean
+  showDoorPriceBreakdown: boolean
   scopeNotes: string
 }
 
@@ -26,19 +31,22 @@ interface WindowsDoorsProductFormProps {
 
 export default function WindowsDoorsProductForm({ data, updateData }: WindowsDoorsProductFormProps) {
   const [formData, setFormData] = useState<WindowsDoorsData>({
-    windowType: data.windowType || "vinyl",
+    windowType: data.windowType || "vinyl-retrofit-dual",
     windowColor: data.windowColor || "white",
     doorTypes: data.doorTypes || [],
     windowCount: data.windowCount || "0",
     doorCount: data.doorCount || "0",
     customColors: data.customColors || false,
-    scopeNotes: data.scopeNotes || generateScopeNotes("vinyl", "white", [], false),
+    windowPrice: data.windowPrice || "",
+    doorPrices: data.doorPrices || {},
+    showPricing: data.showPricing !== undefined ? data.showPricing : true,
+    showDoorPriceBreakdown: data.showDoorPriceBreakdown !== undefined ? data.showDoorPriceBreakdown : true,
+    scopeNotes: data.scopeNotes || generateScopeNotes("vinyl-retrofit-dual", "white", [], false),
   })
 
   const windowTypes = [
-    { value: "vinyl", label: "Vinyl", description: "Durable, low-maintenance vinyl windows" },
-    { value: "dual-pane", label: "Dual Pane", description: "Energy-efficient dual pane glass" },
-    { value: "retrofit", label: "Retrofit", description: "Replacement windows for existing frames" },
+    { value: "vinyl-retrofit-dual", label: "Vinyl Retrofit Dual Pane", description: "Energy-efficient dual pane vinyl retrofit windows" },
+    // Other window types can be added here if needed
   ]
 
   const windowColors = [
@@ -65,7 +73,7 @@ export default function WindowsDoorsProductForm({ data, updateData }: WindowsDoo
     let notes = ""
 
     if (windowType) {
-      notes += `Window Installation:\n- ${windowType.charAt(0).toUpperCase() + windowType.slice(1)} windows with ${
+      notes += `Window Installation:\n- ${windowType.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())} with ${
         windowColor
       } frames\n- Custom order to fit existing openings\n- Remove and dispose of existing windows\n- Professional installation with proper sealing and caulking\n- Clean up and haul away of all debris\n`
 
@@ -126,6 +134,13 @@ export default function WindowsDoorsProductForm({ data, updateData }: WindowsDoo
       updateData(formData)
     }
   }, [formData, updateData, data])
+
+  // Calculate total door price
+  const calculateTotalDoorPrice = () => {
+    return Object.values(formData.doorPrices).reduce((total, price) => {
+      return total + (parseFloat(price) || 0);
+    }, 0).toFixed(2);
+  }
 
   return (
     <div className="space-y-6">
@@ -264,6 +279,82 @@ export default function WindowsDoorsProductForm({ data, updateData }: WindowsDoo
           </div>
         </TabsContent>
       </Tabs>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Pricing</h3>
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="show-pricing">Show to customer</Label>
+            <Switch
+              id="show-pricing"
+              checked={formData.showPricing}
+              onCheckedChange={(checked) => handleChange("showPricing", checked)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="window-price">Windows Total Price</Label>
+            <div className="relative max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <Input
+                id="window-price"
+                placeholder="0.00"
+                value={formData.windowPrice}
+                onChange={(e) => handleChange("windowPrice", e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          </div>
+        </div>
+
+        {formData.doorTypes.length > 0 && (
+          <div className="space-y-4 border-t pt-4">
+            <h4 className="font-medium">Door Pricing</h4>
+            
+            {formData.doorTypes.map((doorType) => (
+              <div key={doorType} className="space-y-2">
+                <Label htmlFor={`door-price-${doorType}`}>
+                  {doorType.charAt(0).toUpperCase() + doorType.slice(1)} Door Price
+                </Label>
+                <div className="relative max-w-xs">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <Input
+                    id={`door-price-${doorType}`}
+                    placeholder="0.00"
+                    value={formData.doorPrices[doorType] || ""}
+                    onChange={(e) => {
+                      const newDoorPrices = {...formData.doorPrices, [doorType]: e.target.value};
+                      handleChange("doorPrices", newDoorPrices);
+                    }}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            ))}
+            
+            {formData.doorTypes.length > 1 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Total Door Price: ${calculateTotalDoorPrice()}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="show-door-price-breakdown"
+                    checked={formData.showDoorPriceBreakdown}
+                    onCheckedChange={(checked) => handleChange("showDoorPriceBreakdown", checked)}
+                    className="size-4"
+                  />
+                  <Label htmlFor="show-door-price-breakdown" className="text-xs">
+                    Show individual door prices (or combine into one total)
+                  </Label>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Scope Description</h3>
