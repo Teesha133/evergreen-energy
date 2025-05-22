@@ -1,0 +1,6 @@
+PlanNumber,RateName,PaymentFactor,MerchantFee,Notes,Status
+WIN-001,Vinyl Windows,650,15,Energy efficient per unit,active
+WIN-002,Retrofit Windows,550,18,Easy installation per unit,active
+WIN-003,Dual-Pane Windows,750,12,Extra insulation per unit,active
+WIN-004,Bay Windows,1200,10,Premium feature per unit,active
+WIN-005,Window Installation,250,25,Labor only per window,active 

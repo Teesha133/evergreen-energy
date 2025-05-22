@@ -240,16 +240,16 @@ export default function RoofingProductForm({ data, updateData }: RoofingProductF
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
+        <div className="space-y-2">
             <Label htmlFor="total-price">Roofing Price</Label>
-            <div className="relative max-w-xs">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-              <Input
+          <div className="relative max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <Input
                 id="total-price"
-                placeholder="0.00"
+              placeholder="0.00"
                 value={formData.totalPrice}
                 onChange={(e) => handleChange("totalPrice", e.target.value)}
-                className="pl-8"
+              className="pl-8"
               />
             </div>
           </div>

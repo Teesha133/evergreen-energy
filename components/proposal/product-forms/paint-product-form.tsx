@@ -173,7 +173,7 @@ export default function PaintProductForm({ data, updateData }: PaintProductFormP
               <div key={tone.value} className="flex items-center space-x-2">
                 <RadioGroupItem value={tone.value} id={`tone-${tone.value}`} />
                 <Label htmlFor={`tone-${tone.value}`}>{tone.label}</Label>
-              </div>
+            </div>
             ))}
           </RadioGroup>
         </div>

@@ -1,0 +1,6 @@
+PlanNumber,RateName,PaymentFactor,MerchantFee,Notes,Status
+SOL-001,Solar Panel - Standard,650,15,Standard efficiency per panel,active
+SOL-002,Solar Panel - Premium,850,12,High efficiency per panel,active
+SOL-003,Solar Inverter,1800,10,Grid-tie compatible,active
+SOL-004,Solar Battery,7500,8,Home storage system,active
+SOL-005,Solar Installation,2500,20,Full system installation,active 

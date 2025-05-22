@@ -1,0 +1,6 @@
+PlanNumber,RateName,PaymentFactor,MerchantFee,Notes,Status
+HVAC-001,AC Installation,3500,15,Complete system,active
+HVAC-002,Furnace Installation,2800,12,High efficiency,active
+HVAC-003,Heat Pump Installation,4200,10,Dual function system,active
+HVAC-004,Ductwork,35,30,Per linear foot,active
+HVAC-005,Thermostat Installation,180,18,Smart thermostat,active 

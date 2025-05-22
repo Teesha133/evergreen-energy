@@ -1,0 +1,6 @@
+PlanNumber,RateName,PaymentFactor,MerchantFee,Notes,Status
+GAR-001,Standard Garage Door,1200,12,Single car standard,active
+GAR-002,Premium Garage Door,1800,10,Premium insulated door,active
+GAR-003,Garage Door Opener,350,20,With remote controls,active
+GAR-004,Garage Door Sensor,80,25,Safety feature,active
+GAR-005,Garage Door Installation,250,30,Labor service per door,active 

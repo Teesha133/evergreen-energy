@@ -139,6 +139,42 @@ export default function PricingPage() {
     }
   };
 
+  const handleToggleVisibility = async (item: PricingItem) => {
+    try {
+      const updatedItem = { ...item, visible: !item.visible };
+      
+      const response = await fetch('/api/pricing', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedItem),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update visibility');
+      }
+
+      const savedItem = await response.json();
+      
+      setPricingItems(items =>
+        items.map(i => i.id === item.id ? savedItem : i)
+      );
+      
+      toast({
+        title: `Item ${savedItem.visible ? 'visible' : 'hidden'}`,
+        description: `"${savedItem.rate_name}" is now ${savedItem.visible ? 'visible' : 'hidden'}.`
+      });
+    } catch (error) {
+      console.error('Error updating visibility:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update visibility. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const resetForm = () => {
     setFormPlanNumber("");
     setFormRateName("");
@@ -269,6 +305,21 @@ export default function PricingPage() {
       item.rate_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Add function to load product pricing data after import
+  const loadProductPricing = async (category: string) => {
+    try {
+      const response = await fetch(`/api/products/pricing?category=${category}`);
+      if (!response.ok) {
+        throw new Error('Failed to load pricing data');
+      }
+      const products = await response.json();
+      return products;
+    } catch (error) {
+      console.error('Error loading product pricing:', error);
+      return [];
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -350,7 +401,10 @@ export default function PricingPage() {
                         <TableCell>{item.merchant_fee}%</TableCell>
                         <TableCell>{item.notes}</TableCell>
                         <TableCell>
-                          <Switch checked={item.visible} />
+                          <Switch 
+                            checked={item.visible} 
+                            onCheckedChange={() => handleToggleVisibility(item)}
+                          />
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

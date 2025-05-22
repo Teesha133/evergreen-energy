@@ -1,0 +1,6 @@
+PlanNumber,RateName,PaymentFactor,MerchantFee,Notes,Status
+ROF-001,Standard Asphalt Shingles,450,10,Standard installation per square,active
+ROF-002,Premium Metal Roofing,850,12,Premium quality per square,active
+ROF-003,Tile Roofing,950,15,Heavy duty per square,active
+ROF-004,Plywood Replacement,120,25,Per square repair,active
+ROF-005,Roof Removal,80,30,Labor only per square,active 
