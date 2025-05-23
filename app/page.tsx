@@ -58,21 +58,21 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b sticky top-0 z-10 backdrop-blur-sm bg-white/90 shadow-sm">
-        <div className="relative flex justify-end items-center px-4 py-3">
+        <div className="flex justify-between items-center px-4 py-3">
           <motion.div
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 flex items-center z-10"
+            className="flex items-center"
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
             <Link href="/" className="flex items-center">
-              <div className="flex items-center ml-1">
+              <div className="flex items-center">
                 <img 
                   src="/evergreen.png" 
                   alt="Evergreen Energy Upgrades Logo" 
-                  className="h-14 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
-                <span className="text-lg font-semibold text-gray-800 ml-2 hidden sm:inline-block">EverGreen Energy Proposals</span>
+                <span className="text-xl font-semibold text-gray-800 ml-3 hidden sm:inline-block">EverGreen Energy Proposals</span>
               </div>
             </Link>
           </motion.div>

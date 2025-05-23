@@ -12,7 +12,8 @@
     "update:roles": "node scripts/update-existing-roles.js",
     "db:migrate": "node scripts/neon-migrate.js",
     "db:migrate:legacy": "node scripts/migrate.js",
-    "db:migrate:neon": "node scripts/neon-migrate.js"
+    "db:migrate:neon": "node scripts/neon-migrate.js",
+    "fix-duplicates": "node scripts/run-migration.js"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "latest",

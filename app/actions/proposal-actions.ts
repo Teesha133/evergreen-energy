@@ -179,6 +179,10 @@ export async function getProposalById(id: string) {
         monthlyPayment: Number.parseFloat(proposal.monthly_payment) || 0,
         financingTerm: proposal.financing_term || 60,
         interestRate: Number.parseFloat(proposal.interest_rate) || 5.99,
+        financingPlanId: proposal.financing_plan_id,
+        financingPlanName: proposal.financing_plan_name,
+        merchantFee: proposal.merchant_fee,
+        financingNotes: proposal.financing_notes
       },
       status: proposal.status,
       createdAt: proposal.created_at,
@@ -243,9 +247,10 @@ export async function createProposal(data: any) {
       `
       INSERT INTO proposals (
         proposal_number, customer_id, status, subtotal, discount, total, 
-        monthly_payment, financing_term, interest_rate, created_by, user_id
+        monthly_payment, financing_term, interest_rate, created_by, user_id,
+        financing_plan_id, financing_plan_name, merchant_fee, financing_notes
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id
     `,
       [
@@ -259,7 +264,11 @@ export async function createProposal(data: any) {
         data.pricing.financingTerm || 60,
         data.pricing.interestRate || 5.99,
         data.createdBy || userId,
-        userId
+        userId,
+        data.pricing.financingPlanId || null,
+        data.pricing.financingPlanName || null,
+        data.pricing.merchantFee || null,
+        data.pricing.financingNotes || null
       ],
     )
 

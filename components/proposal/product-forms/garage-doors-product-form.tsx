@@ -139,12 +139,12 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
         <RadioGroup
           value={formData.model}
           onValueChange={(value) => handleChange("model", value)}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"
         >
           {models.map((model) => (
             <Card
               key={model.value}
-              className={`cursor-pointer border ${formData.model === model.value ? "border-rose-600" : ""}`}
+              className={`cursor-pointer border w-full ${formData.model === model.value ? "border-rose-600" : ""}`}
             >
               <CardContent className="p-4 flex items-start gap-3">
                 <RadioGroupItem
@@ -167,8 +167,8 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
         </RadioGroup>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full">
+        <div className="space-y-2 w-full">
           <Label htmlFor="door-width">Width (feet)</Label>
           <Input
             id="door-width"
@@ -178,9 +178,10 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
             step="1"
             value={formData.width}
             onChange={(e) => handleChange("width", e.target.value)}
+            className="w-full"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <Label htmlFor="door-height">Height (feet)</Label>
           <Input
             id="door-height"
@@ -190,9 +191,10 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
             step="1"
             value={formData.height}
             onChange={(e) => handleChange("height", e.target.value)}
+            className="w-full"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <Label htmlFor="door-quantity">Quantity</Label>
           <Input
             id="door-quantity"
@@ -201,22 +203,23 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
             max="4"
             value={formData.quantity}
             onChange={(e) => handleChange("quantity", e.target.value)}
+            className="w-full"
           />
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         <h3 className="text-lg font-medium">Add-ons</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
           {addonOptions.map((addon) => (
-            <div key={addon.value} className="flex items-start space-x-3">
+            <div key={addon.value} className="flex items-start space-x-3 w-full">
               <Checkbox
                 id={`addon-${addon.value}`}
                 checked={formData.addons.includes(addon.value)}
                 onCheckedChange={() => handleAddonToggle(addon.value)}
                 className={formData.addons.includes(addon.value) ? "text-rose-600" : ""}
               />
-              <div className="space-y-1">
+              <div className="space-y-1 flex-1">
                 <Label htmlFor={`addon-${addon.value}`} className="font-medium cursor-pointer">
                   {addon.label}
                 </Label>
@@ -227,7 +230,7 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Pricing</h3>
           <div className="flex items-center space-x-2">
@@ -240,47 +243,49 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <Label htmlFor="total-price">Garage Door Total Price</Label>
-          <div className="relative max-w-xs">
+          <div className="relative w-full max-w-md">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             <Input
               id="total-price"
               placeholder="0.00"
               value={formData.totalPrice}
               onChange={(e) => handleChange("totalPrice", e.target.value)}
-              className="pl-8"
+              className="pl-8 w-full"
             />
           </div>
         </div>
 
         {formData.addons.length > 0 && (
-          <div className="space-y-4 border-t pt-4">
+          <div className="space-y-4 border-t pt-4 w-full">
             <h4 className="font-medium">Add-on Pricing</h4>
             
-            {formData.addons.map((addon) => (
-              <div key={addon} className="space-y-2">
-                <Label htmlFor={`addon-price-${addon}`}>
-                  {addon.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Price
-                </Label>
-                <div className="relative max-w-xs">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                  <Input
-                    id={`addon-price-${addon}`}
-                    placeholder="0.00"
-                    value={formData.addonPrices[addon] || ""}
-                    onChange={(e) => {
-                      const newAddonPrices = {...formData.addonPrices, [addon]: e.target.value};
-                      handleChange("addonPrices", newAddonPrices);
-                    }}
-                    className="pl-8"
-                  />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
+              {formData.addons.map((addon) => (
+                <div key={addon} className="space-y-2 w-full">
+                  <Label htmlFor={`addon-price-${addon}`}>
+                    {addon.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} Price
+                  </Label>
+                  <div className="relative w-full">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <Input
+                      id={`addon-price-${addon}`}
+                      placeholder="0.00"
+                      value={formData.addonPrices[addon] || ""}
+                      onChange={(e) => {
+                        const newAddonPrices = {...formData.addonPrices, [addon]: e.target.value};
+                        handleChange("addonPrices", newAddonPrices);
+                      }}
+                      className="pl-8 w-full"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             
             {formData.addons.length > 1 && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 space-y-2 w-full">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Total Add-ons Price: ${calculateTotalAddonPrice()}</p>
                 </div>
@@ -301,13 +306,13 @@ export default function GarageDoorsProductForm({ data, updateData }: GarageDoors
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         <h3 className="text-lg font-medium">Scope Description</h3>
         <Textarea
           value={formData.scopeNotes}
           onChange={(e) => handleChange("scopeNotes", e.target.value)}
           rows={10}
-          className="font-mono text-sm"
+          className="font-mono text-sm w-full"
         />
       </div>
     </div>

@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Validate pricing
     const validationErrors = pricingItems.map((item, index) => {
       const errors = [];
@@ -175,10 +175,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Insert all pricing items
     const results = [];
-    
+
     for (const item of pricingItems) {
       // Check if a similar item already exists
       const existingItems = await executeQuery(
@@ -188,9 +188,9 @@ export async function POST(req: NextRequest) {
         `,
         [item.plan_number, item.rate_name]
       );
-      
+
       let result;
-      
+
       if (existingItems.length > 0) {
         // Update existing item
         const id = existingItems[0].id;
@@ -233,12 +233,12 @@ export async function POST(req: NextRequest) {
           ]
         );
       }
-      
+
       if (result && result.length > 0) {
         results.push(result[0]);
       }
     }
-    
+
     return NextResponse.json(
       {
         success: true,

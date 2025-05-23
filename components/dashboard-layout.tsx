@@ -69,12 +69,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen flex flex-col">
       {/* Top Navigation */}
       <header className="border-b bg-white shadow-sm sticky top-0 z-40">
-        <div className="relative flex justify-end items-center px-4 py-3">
-          {/* Logo and title position at extreme left */}
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 flex items-center z-10">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo and title section - left side */}
+          <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden ml-1">
+                <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -123,12 +123,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   priority
                   onError={handleLogoError}
                 />
-                <span className="text-lg font-semibold text-gray-800 ml-2 hidden sm:inline-block">EverGreen Proposals</span>
+                <span className="text-xl font-semibold text-gray-800 ml-3 hidden sm:inline-block">EverGreen Proposals</span>
               </div>
             </Link>
           </div>
 
-          {/* Main header content aligned right */}
+          {/* User profile - right side */}
           <div className="flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -242,8 +242,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </motion.aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 bg-gray-50">
-          <div className="container mx-auto">{children}</div>
+        <main className="flex-1 p-4 md:p-6 bg-gray-50 overflow-x-hidden">
+          <div className="w-full max-w-full mx-auto">{children}</div>
         </main>
       </div>
     </div>

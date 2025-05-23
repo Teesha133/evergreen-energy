@@ -15,6 +15,34 @@ import ProposalStepper from "@/components/proposal/proposal-stepper"
 import { createProposal, getProposalById } from "@/app/actions/proposal-actions"
 import { toast } from "@/hooks/use-toast"
 
+// Define interfaces for typesafety
+interface CustomerInfo {
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+}
+
+interface PricingData {
+  subtotal: number;
+  discount: number;
+  total: number;
+  monthlyPayment: number;
+  financingPlanId?: number;
+  financingPlanName?: string;
+  merchantFee?: number;
+  financingNotes?: string;
+}
+
+interface ProposalFormData {
+  customer: CustomerInfo;
+  services: string[];
+  products: Record<string, any>;
+  pricing: PricingData;
+  id?: string;
+  proposalNumber?: string;
+}
+
 // Memoize the form components to prevent unnecessary re-renders
 const MemoizedCustomerInfoForm = memo(CustomerInfoForm)
 const MemoizedScopeOfWorkForm = memo(ScopeOfWorkForm)
@@ -28,7 +56,7 @@ export default function NewProposalPage() {
   const proposalId = searchParams.get("id")
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProposalFormData>({
     customer: {
       name: "",
       address: "",
@@ -42,6 +70,9 @@ export default function NewProposalPage() {
       discount: 0,
       total: 0,
       monthlyPayment: 0,
+      financingPlanId: undefined,
+      financingPlanName: "",
+      merchantFee: 0,
     },
   })
 
@@ -151,16 +182,16 @@ export default function NewProposalPage() {
   }
 
   // Use useCallback with stable references to prevent unnecessary re-renders
-  const updateCustomer = useCallback((data) => {
+  const updateCustomer = useCallback((data: Partial<CustomerInfo>) => {
     setFormData((prev) => {
       if (JSON.stringify(prev.customer) === JSON.stringify(data)) {
         return prev // No change
       }
-      return { ...prev, customer: data }
+      return { ...prev, customer: { ...prev.customer, ...data } }
     })
   }, [])
 
-  const updateServices = useCallback((data) => {
+  const updateServices = useCallback((data: string[]) => {
     setFormData((prev) => {
       if (JSON.stringify(prev.services) === JSON.stringify(data)) {
         return prev // No change
@@ -169,7 +200,7 @@ export default function NewProposalPage() {
     })
   }, [])
 
-  const updateProducts = useCallback((data) => {
+  const updateProducts = useCallback((data: Record<string, any>) => {
     setFormData((prev) => {
       if (JSON.stringify(prev.products) === JSON.stringify(data)) {
         return prev // No change
@@ -178,12 +209,12 @@ export default function NewProposalPage() {
     })
   }, [])
 
-  const updatePricing = useCallback((data) => {
+  const updatePricing = useCallback((data: Partial<PricingData>) => {
     setFormData((prev) => {
       if (JSON.stringify(prev.pricing) === JSON.stringify(data)) {
         return prev // No change
       }
-      return { ...prev, pricing: data }
+      return { ...prev, pricing: { ...prev.pricing, ...data } }
     })
   }, [])
 
@@ -194,53 +225,93 @@ export default function NewProposalPage() {
         <p className="text-gray-500">Generate a detailed sales proposal for your customer</p>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
+      <Card className="mb-6 overflow-hidden border-0 shadow-md">
+        <CardContent className="pt-6 pb-4">
           <ProposalStepper steps={steps} currentStep={currentStep} />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{steps[currentStep].label}</CardTitle>
-          <CardDescription>
-            {currentStep === 0 && "Enter customer details"}
-            {currentStep === 1 && "Select services to include in the proposal"}
-            {currentStep === 2 && "Choose products and options for selected services"}
-            {currentStep === 3 && "Review pricing breakdown and apply discounts"}
-            {currentStep === 4 && "Collect signature and deposit"}
-          </CardDescription>
+      <Card className="border-0 shadow-md">
+        <CardHeader className="bg-gradient-to-r from-rose-50 to-white border-b">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-100 text-rose-600 font-medium">
+              {currentStep + 1}
+            </div>
+            <div>
+              <CardTitle>{steps[currentStep].label}</CardTitle>
+              <CardDescription>
+                {currentStep === 0 && "Enter customer details to personalize the proposal"}
+                {currentStep === 1 && "Select services to include in the customer's project scope"}
+                {currentStep === 2 && "Choose specific products and options for each selected service"}
+                {currentStep === 3 && "Set pricing details and configure payment options"}
+                {currentStep === 4 && "Review and finalize the proposal for signature"}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          {currentStep === 0 && <MemoizedCustomerInfoForm data={formData.customer} updateData={updateCustomer} />}
-          {currentStep === 1 && <MemoizedScopeOfWorkForm data={formData.services} updateData={updateServices} />}
-          {currentStep === 2 && (
-            <MemoizedProductSelectionForm
-              services={formData.services}
-              data={formData.products}
-              updateData={updateProducts}
-            />
-          )}
-          {currentStep === 3 && (
-            <MemoizedPricingBreakdownForm
-              services={formData.services}
-              products={formData.products}
-              data={formData.pricing}
-              updateData={updatePricing}
-            />
-          )}
-          {currentStep === 4 && <MemoizedSignatureDepositForm formData={formData} />}
-
-          <div className="flex justify-between mt-8">
-            <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 0}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-            </Button>
-
-            {currentStep < steps.length - 1 && (
-              <Button onClick={handleNext} className="bg-rose-600 hover:bg-rose-700">
-                Next <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+        <CardContent className="pt-8">
+          <div className="max-w-4xl">
+            {currentStep === 0 && <MemoizedCustomerInfoForm data={formData.customer} updateData={updateCustomer} />}
+            {currentStep === 1 && <MemoizedScopeOfWorkForm data={formData.services} updateData={updateServices} />}
+            {currentStep === 2 && (
+              <MemoizedProductSelectionForm
+                services={formData.services}
+                data={formData.products}
+                updateData={updateProducts}
+              />
             )}
+            {currentStep === 3 && (
+              <MemoizedPricingBreakdownForm
+                services={formData.services}
+                products={formData.products}
+                data={formData.pricing}
+                updateData={updatePricing}
+              />
+            )}
+            {currentStep === 4 && <MemoizedSignatureDepositForm formData={formData} />}
+
+            <div className="flex justify-between mt-10">
+              <Button 
+                variant="outline" 
+                onClick={handlePrevious} 
+                disabled={currentStep === 0}
+                className="px-6"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+
+              {currentStep < steps.length - 1 ? (
+                <Button 
+                  onClick={handleNext} 
+                  className="bg-rose-600 hover:bg-rose-700 px-6"
+                >
+                  Next <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting}
+                  className="bg-emerald-600 hover:bg-emerald-700 px-6"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                      Creating Proposal
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" /> 
+                      Complete Proposal
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            {/* Simple progress indicator */}
+            <div className="flex justify-start mt-8 text-sm text-gray-500">
+              Step {currentStep + 1} of {steps.length} • {Math.round((currentStep / (steps.length - 1)) * 100)}% Complete
+            </div>
           </div>
         </CardContent>
       </Card>

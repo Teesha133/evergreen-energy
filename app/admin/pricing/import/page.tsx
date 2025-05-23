@@ -30,6 +30,13 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+// At the top of the file, add the type declaration
+declare global {
+  interface Window {
+    gtag?: (command: string, action: string, params: object) => void;
+  }
+}
+
 // Define types for data
 type ProductData = {
   id: number;
@@ -120,13 +127,13 @@ export default function PricingImportPage() {
 
       clearInterval(progressInterval)
       setUploadProgress(100)
-      setIsUploading(false)
-      setIsProcessing(true)
+          setIsUploading(false)
+          setIsProcessing(true)
 
       const data = await response.json()
 
       if (!response.ok) {
-        setIsProcessing(false)
+            setIsProcessing(false)
 
         // Handle validation errors
         if (data.validationErrors && data.validationErrors.length > 0) {
@@ -137,7 +144,7 @@ export default function PricingImportPage() {
             })
           })
           setValidationErrors(errors)
-          setShowPreview(true)
+            setShowPreview(true)
           
           // Set preview data from the file for validation view
           const fileReader = new FileReader()
@@ -198,7 +205,7 @@ export default function PricingImportPage() {
           setFile(null)
           setFileName("")
           setPreviewData([])
-          setValidationErrors([])
+              setValidationErrors([])
           setShowPreview(false)
           
           // Store import results for display
@@ -217,7 +224,7 @@ export default function PricingImportPage() {
     if (!file || validationErrors.length > 0) return
     
     setIsProcessing(true)
-    
+
     // Re-upload the file after validation
     const formData = new FormData()
     formData.append('file', file)
@@ -236,7 +243,7 @@ export default function PricingImportPage() {
       if (!response.ok) {
         alert(`Error: ${data.error || 'Failed to import data'}`)
       } else {
-        setShowSuccessDialog(true)
+      setShowSuccessDialog(true)
         
         // Reset state
         setFile(null)
@@ -256,16 +263,29 @@ export default function PricingImportPage() {
   }
 
   const handleDownloadTemplate = () => {
-    // Use category-specific template
-    const templatePath = `/templates/${selectedCategory}-pricing-template.csv`;
+    // Make sure the template exists
+    const templateFileName = `${selectedCategory}-pricing-template.csv`;
+    const templatePath = `/templates/${templateFileName}`;
     
     // Create and trigger the download
     const link = document.createElement('a');
     link.href = templatePath;
-    link.download = `${selectedCategory}-pricing-template.csv`;
+    link.download = templateFileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    // Add analytics tracking if available
+    try {
+      if (window.gtag) {
+        window.gtag('event', 'download', {
+          event_category: 'templates',
+          event_label: templateFileName
+        });
+      }
+    } catch (e) {
+      console.log('Analytics not available');
+    }
   }
 
   const formatCurrency = (value: number) => {

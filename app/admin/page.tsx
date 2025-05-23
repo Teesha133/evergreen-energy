@@ -143,8 +143,8 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col gap-6 w-full">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
       <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
@@ -154,9 +154,9 @@ export default function AdminDashboardPage() {
       </div>
 
       {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {[...Array(4)].map((_, index) => (
-            <Card key={index} className="h-[140px] animate-pulse">
+            <Card key={index} className="h-[140px] animate-pulse w-full">
               <CardContent className="p-6">
                 <div className="h-6 w-1/2 bg-muted rounded mb-4"></div>
                 <div className="h-10 w-2/3 bg-muted rounded"></div>
@@ -165,9 +165,9 @@ export default function AdminDashboardPage() {
             ))}
           </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
           {metrics.map((metric) => (
-            <Card key={metric.id}>
+            <Card key={metric.id} className="w-full">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
                   {metric.name}
@@ -194,9 +194,9 @@ export default function AdminDashboardPage() {
                 </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-        <div className="col-span-7 md:col-span-4">
-          <Card className="h-full">
+      <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 w-full">
+        <div className="col-span-7 lg:col-span-4 w-full">
+          <Card className="h-full w-full">
               <CardHeader>
               <CardTitle>Monthly Proposal Trends</CardTitle>
               <CardDescription>Proposals created per month</CardDescription>
@@ -211,8 +211,8 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
           </div>
-        <div className="col-span-7 md:col-span-3">
-          <Card className="h-full">
+        <div className="col-span-7 lg:col-span-3 w-full">
+          <Card className="h-full w-full">
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
               <CardDescription>Latest actions in the system</CardDescription>

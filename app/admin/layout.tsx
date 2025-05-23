@@ -40,6 +40,7 @@ import {
   User,
   HelpCircle,
   BarChart3,
+  Database,
 } from "lucide-react"
 import { Suspense } from "react"
 
@@ -53,6 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/contracts", label: "Contracts", icon: FileText },
     { href: "/admin/financing", label: "Financing", icon: DollarSign },
     { href: "/admin/pricing", label: "Pricing", icon: BarChart3 },
+    { href: "/admin/database", label: "Database", icon: Database },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/permissions", label: "Permissions", icon: ShieldCheck },
     { href: "/admin/settings", label: "Settings", icon: Settings },
@@ -60,10 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-2 py-3">
+            <div className="flex items-center gap-2 px-2 py-3 w-full">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
                 <span className="text-lg font-bold text-primary-foreground">E</span>
               </div>
@@ -80,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
-                      <Link href={item.href}>
+                      <Link href={item.href} className="w-full">
                         <item.icon />
                         <span>{item.label}</span>
                       </Link>
@@ -91,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
-            <div className="px-3 py-2">
+            <div className="px-3 py-2 w-full">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="w-full justify-start px-2">
@@ -128,10 +130,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+        <div className="flex flex-1 flex-col w-full overflow-hidden">
+          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6 w-full">
             <SidebarTrigger />
-            <div className="flex flex-1 items-center gap-4 md:gap-8">
+            <div className="flex flex-1 items-center gap-4 md:gap-8 w-full">
               <div className="relative flex-1 md:grow-0 md:basis-1/3">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <input
@@ -148,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
           </header>
-          <main className="flex-1 p-4 sm:p-6 md:p-8">
+          <main className="flex-1 p-4 sm:p-6 md:p-8 w-full overflow-x-hidden">
             <Suspense>{children}</Suspense>
           </main>
         </div>
