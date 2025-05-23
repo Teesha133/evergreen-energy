@@ -393,7 +393,7 @@ function PricingBreakdownForm({ services, products, data, updateData }: PricingB
         {formData.financingPlanId && (
           <div className="flex justify-center mt-4 text-sm text-gray-500">
             <p>Selected plan: <span className="font-medium">{formData.financingPlanName}</span></p>
-          </div>
+                </div>
         )}
       </div>
     </div>

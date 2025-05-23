@@ -83,7 +83,7 @@ export default function FinancingPage() {
   const [formMerchantFee, setFormMerchantFee] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formIsActive, setFormIsActive] = useState(true);
-  
+
   // Example project total for demos
   const [exampleProjectTotal, setExampleProjectTotal] = useState(10000);
 
@@ -312,7 +312,7 @@ export default function FinancingPage() {
         is_active: formIsActive
       };
 
-      if (editingPlan) {
+          if (editingPlan) {
         // Update existing plan
         const response = await fetch('/api/financing/plans', {
           method: 'PUT',
@@ -519,7 +519,7 @@ export default function FinancingPage() {
           >
             <Download className="h-4 w-4" />
             <span>Export to Excel</span>
-          </Button>
+              </Button>
           <Button 
             variant="outline"
             className="flex items-center gap-2"
@@ -539,7 +539,7 @@ export default function FinancingPage() {
           <Button className="flex items-center gap-2" onClick={handleAddPlan}>
             <Plus className="h-4 w-4" />
             <span>Add Plan</span>
-          </Button>
+                </Button>
         </div>
       </div>
 
@@ -551,69 +551,69 @@ export default function FinancingPage() {
         
         <TabsContent value="plans" className="space-y-4">
           <Card id="all-plans">
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                 <div>
-                  <CardTitle>Financing Plans</CardTitle>
-                  <CardDescription>
-                    Manage financing plans, payment factors, and merchant fees
-                  </CardDescription>
+              <CardTitle>Financing Plans</CardTitle>
+              <CardDescription>
+                Manage financing plans, payment factors, and merchant fees
+              </CardDescription>
                 </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Search className="h-4 w-4 text-muted-foreground absolute ml-2" />
-                  <Input
-                    placeholder="Search plans..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8 w-full"
-                  />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Search className="h-4 w-4 text-muted-foreground absolute ml-2" />
+              <Input
+                placeholder="Search plans..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full"
+              />
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              {loading ? (
-                <div className="text-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">Loading financing plans...</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Plan #</TableHead>
-                        <TableHead>Provider</TableHead>
-                        <TableHead>Plan Name</TableHead>
-                        <TableHead>Interest Rate</TableHead>
-                        <TableHead>Term</TableHead>
-                        <TableHead>Payment Factor</TableHead>
-                        <TableHead>Merchant Fee</TableHead>
-                        <TableHead>Notes</TableHead>
-                        <TableHead>Active</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredPlans.length > 0 ? (
-                        filteredPlans.map((plan) => (
+          {loading ? (
+            <div className="text-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">Loading financing plans...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Plan #</TableHead>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Plan Name</TableHead>
+                    <TableHead>Interest Rate</TableHead>
+                    <TableHead>Term</TableHead>
+                    <TableHead>Payment Factor</TableHead>
+                    <TableHead>Merchant Fee</TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead>Active</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPlans.length > 0 ? (
+                    filteredPlans.map((plan) => (
                         <TableRow 
                           key={plan.id} 
                           className={selectedPlan?.id === plan.id ? "bg-muted/50" : undefined}
                           onClick={() => setSelectedPlan(plan)}
                         >
-                          <TableCell>{plan.plan_number}</TableCell>
-                          <TableCell>{plan.provider}</TableCell>
-                          <TableCell>{plan.plan_name}</TableCell>
-                          <TableCell>{plan.interest_rate}%</TableCell>
-                          <TableCell>{plan.term_months} months</TableCell>
+                        <TableCell>{plan.plan_number}</TableCell>
+                        <TableCell>{plan.provider}</TableCell>
+                        <TableCell>{plan.plan_name}</TableCell>
+                        <TableCell>{plan.interest_rate}%</TableCell>
+                        <TableCell>{plan.term_months} months</TableCell>
                           <TableCell>{plan.payment_factor}%</TableCell>
-                          <TableCell>{plan.merchant_fee}%</TableCell>
+                        <TableCell>{plan.merchant_fee}%</TableCell>
                           <TableCell className="max-w-[200px] truncate">
                             {plan.notes || 
                               <span className="text-muted-foreground italic">No notes</span>
                             }
                           </TableCell>
-                          <TableCell>
+                      <TableCell>
                             <Switch 
                               checked={plan.is_active} 
                               onCheckedChange={async (checked) => {
@@ -664,49 +664,49 @@ export default function FinancingPage() {
                                 }
                               }}
                             />
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="icon"
+                      </TableCell>
+                      <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleEditPlan(plan);
                                 }}
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeletePlan(plan.id);
                                 }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={10} className="text-center py-4">
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-4">
                             {searchQuery 
                               ? "No financing plans matched your search."
                               : "No financing plans found. Create one to get started."
                             }
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              </div>
+          )}
             </CardContent>
           </Card>
           
@@ -789,7 +789,7 @@ export default function FinancingPage() {
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
-          <DialogHeader>
+            <DialogHeader>
             <DialogTitle>
               {editingPlan ? "Edit Financing Plan" : "Add New Financing Plan"}
             </DialogTitle>
@@ -798,8 +798,8 @@ export default function FinancingPage() {
                 ? "Update the financing plan details below."
                 : "Fill out the form to create a new financing plan."}
             </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="planNumber" className="text-right">
                 Plan Number
@@ -815,88 +815,88 @@ export default function FinancingPage() {
               <Label htmlFor="provider" className="text-right">
                 Provider
               </Label>
-              <Input
+                <Input
                 id="provider"
                 value={formProvider}
                 onChange={(e) => setFormProvider(e.target.value)}
                 className="col-span-3"
                 placeholder="GreenSky, PACE, Homerun, etc."
-              />
-            </div>
+                />
+              </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="planName" className="text-right">
                 Plan Name
               </Label>
-              <Input
+                <Input
                 id="planName"
                 value={formPlanName}
                 onChange={(e) => setFormPlanName(e.target.value)}
                 className="col-span-3"
-              />
-            </div>
+                />
+              </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="interestRate" className="text-right">
                 Interest Rate (%)
               </Label>
-              <Input
+                    <Input
                 id="interestRate"
-                type="number"
-                step="0.01"
+                      type="number"
+                      step="0.01"
                 value={formInterestRate}
                 onChange={(e) => setFormInterestRate(e.target.value)}
                 className="col-span-3"
-              />
-            </div>
+                    />
+                    </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="termMonths" className="text-right">
                 Term (months)
               </Label>
-              <Input
+                    <Input
                 id="termMonths"
-                type="number"
+                      type="number"
                 value={formTermMonths}
                 onChange={(e) => setFormTermMonths(e.target.value)}
                 className="col-span-3"
-              />
-            </div>
+                    />
+                    </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="paymentFactor" className="text-right">
                 Payment Factor
               </Label>
-              <Input
+                    <Input
                 id="paymentFactor"
-                type="number"
+                      type="number"
                 step="0.0001"
                 value={formPaymentFactor}
                 onChange={(e) => setFormPaymentFactor(e.target.value)}
                 className="col-span-3"
               />
-            </div>
+                    </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="merchantFee" className="text-right">
                 Merchant Fee (%)
               </Label>
-              <Input
+                    <Input
                 id="merchantFee"
-                type="number"
-                step="0.1"
+                      type="number"
+                      step="0.1"
                 value={formMerchantFee}
                 onChange={(e) => setFormMerchantFee(e.target.value)}
                 className="col-span-3"
-              />
-            </div>
+                    />
+                  </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="notes" className="text-right">
                 Notes
               </Label>
-              <Input
+                    <Input
                 id="notes"
                 value={formNotes}
                 onChange={(e) => setFormNotes(e.target.value)}
                 className="col-span-3"
                 placeholder="Special instructions, payment requirements, etc."
-              />
-            </div>
+                    />
+                  </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="isActive" className="text-right">
                 Active
@@ -908,12 +908,12 @@ export default function FinancingPage() {
                   onCheckedChange={setFormIsActive}
                 />
               </div>
+              </div>
             </div>
-          </div>
-          <DialogFooter>
+            <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-              Cancel
-            </Button>
+                Cancel
+              </Button>
             <Button 
               onClick={handleSavePlan} 
               disabled={saving}
@@ -922,9 +922,9 @@ export default function FinancingPage() {
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Save
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
     </div>
   )
 }
